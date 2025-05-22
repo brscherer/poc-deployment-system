@@ -8,8 +8,7 @@ import (
 )
 
 func TestNamespacesExist(t *testing.T) {
-	kubeConfigPath := k8s.GetKubeConfigPathFromEnv()
-	options := k8s.NewKubectlOptions("", kubeConfigPath, "default")
+	options := k8s.NewKubectlOptions("", "", "default")
 
 	// Verify 'infra' namespace exists
 	infraNs := k8s.GetNamespace(t, options, "infra")
@@ -21,8 +20,7 @@ func TestNamespacesExist(t *testing.T) {
 }
 
 func TestGrafanaConfigMapExists(t *testing.T) {
-	kubeConfigPath := k8s.GetKubeConfigPathFromEnv()
-	options := k8s.NewKubectlOptions("", kubeConfigPath, "infra")
+	options := k8s.NewKubectlOptions("", "", "infra")
 
 	cm := k8s.GetConfigMap(t, options, "grafana-dashboards")
 	assert.Contains(t, cm.Data, "dashboard.json")

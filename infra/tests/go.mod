@@ -1,8 +1,11 @@
 module test
 
-go 1.23.0
+go 1.24.3
 
-toolchain go1.24.3
+require (
+	github.com/gruntwork-io/terratest v0.49.0
+	github.com/stretchr/testify v1.10.0
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -59,7 +62,6 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gruntwork-io/go-commons v0.8.0 // indirect
-	github.com/gruntwork-io/terratest v0.49.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
@@ -81,7 +83,6 @@ require (
 	github.com/pquerna/otp v1.4.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/urfave/cli v1.22.16 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
