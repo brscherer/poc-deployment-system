@@ -1,0 +1,27 @@
+image:
+  repository: brunorphl/server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+readinessProbe:
+  httpGet:
+    path: /health-check
+    port: 3000
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /health-check
+    port: 3000
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/health-check"
+  prometheus.io/port: "3000"
