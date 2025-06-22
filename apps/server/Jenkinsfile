@@ -1,0 +1,20 @@
+pipeline {
+  agent any
+  stages {
+    stage('Run Tests') {
+      steps {
+        sh 'cd apps/server && npm install && npm test' // or your preferred test tool
+      }
+    }
+    stage('Deploy with Helm') {
+      steps {
+        sh 'helm upgrade --install server ./apps/server/charts -n apps'
+      }
+    }
+  }
+  post {
+    failure {
+      echo "Tests failed. Stopping deployment."
+    }
+  }
+}
