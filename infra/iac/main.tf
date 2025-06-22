@@ -1,24 +1,15 @@
-provider "kubernetes" {}
-
-resource "kubernetes_namespace" "infra" {
-  metadata {
-    name = var.infra_namespace
-  }
+provider "kubernetes" {
+  config_path = "~/.kube/config"
 }
 
 resource "kubernetes_namespace" "apps" {
   metadata {
-    name = var.app_namespace
+    name = "apps"
   }
 }
 
-resource "kubernetes_config_map" "grafana_dashboards" {
+resource "kubernetes_namespace" "infra" {
   metadata {
-    name      = "grafana-dashboards"
-    namespace = var.infra_namespace
-  }
-
-  data = {
-    "dashboard.json" = file("${path.module}/dashboards/sample-dashboard.json")
+    name = "infra"
   }
 }
