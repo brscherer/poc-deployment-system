@@ -1,20 +1,62 @@
 pipeline {
   agent any
+  environment {
+    DOCKERHUB_CREDS = credentials('dockerhub-creds')
+    IMAGE = "brunorphl/server"
+    TAG = "${env.BUILD_NUMBER}"
+    KUBE_NAMESPACE = "apps"
+  }
   stages {
-    stage('Run Tests') {
+    stage('Checkout') {
+      steps { git '.' }
+    }
+
+    stage('Build Docker Image') {
       steps {
-        sh 'cd apps/server && npm install && npm test' // or your preferred test tool
+        sh "docker build -t $IMAGE:$TAG ."
       }
     }
-    stage('Deploy with Helm') {
+
+    stage('Push to Docker Hub') {
       steps {
-        sh 'helm upgrade --install server ./apps/server/charts -n apps'
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                                         usernameVariable: 'USER',
+                                         passwordVariable: 'PASS')]) {
+          sh "docker login -u $USER -p $PASS"
+          sh "docker push $IMAGE:$TAG"
+        }
+      }
+    }
+
+    stage('Helm Deploy') {
+      steps {
+        sh "helm repo update || true"
+        sh """
+          helm upgrade --install server chart \
+            --namespace $KUBE_NAMESPACE \
+            --set image.repository=$IMAGE \
+            --set image.tag=$TAG \
+            --timeout 5m --wait
+        """
+      }
+    }
+
+    stage('Post-deploy Health Check') {
+      steps {
+        sh """
+          kubectl rollout status deployment/server -n $KUBE_NAMESPACE --timeout=2m
+          kubectl wait --for=condition=ready pod \
+            -l app.kubernetes.io/instance=server \
+            -n $KUBE_NAMESPACE --timeout=2m
+        """
       }
     }
   }
+
   post {
     failure {
-      echo "Tests failed. Stopping deployment."
+      echo 'Deployment failed — rolling back'
+      sh "helm rollback server 0 --namespace $KUBE_NAMESPACE || echo 'No previous revision.'"
     }
   }
 }
