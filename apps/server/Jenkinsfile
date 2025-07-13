@@ -18,7 +18,7 @@ pipeline {
         dir('apps/server') {
           script {
             docker.image('node:20-alpine').inside {
-              sh 'npm install'
+              sh 'npm ci'
               sh 'npm test'
             }
           }
