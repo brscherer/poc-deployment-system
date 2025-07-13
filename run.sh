@@ -43,9 +43,12 @@ helm upgrade --install grafana grafana/grafana \
 
 # 8. Wait for all pods to be ready
 echo "Waiting for infra services to be ready..."
-kubectl rollout status deployment/jenkins -n infra
 kubectl rollout status deployment/prometheus-server -n infra
 kubectl rollout status deployment/grafana -n infra
+
+# Wait for Jenkins controller StatefulSet
+echo "Waiting for Jenkins StatefulSet..."
+kubectl rollout status statefulset/jenkins -n infra --timeout=5m
 
 # 9. Output URLs
 echo "Jenkins URL:    $(minikube service jenkins -n infra --url)"
