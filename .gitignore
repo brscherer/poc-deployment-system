@@ -1,0 +1,54 @@
+# Node dependencies
+/apps/server/node_modules/
+**/node_modules/
+
+# Logs and debug
+/apps/server/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime folders
+/apps/server/dist/
+/apps/server/build/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker artifacts
+**/Dockerfile~
+docker-compose*.yml
+docker-compose*.yaml
+**/docker-*.log
+
+# Docker build cache
+**/docker-compose*
+**/.docker/
+
+# Docker layered build files
+**/tmp/
+**/cache/
+
+# Kubernetes config: local kubeconfig and state
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
+
+# OpenTofu state and logs
+**/.t*.*
+infra/iac/.terraform/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS files
+*.swp
+*.lock
