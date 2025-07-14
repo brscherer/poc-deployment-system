@@ -1,7 +1,9 @@
 const express = require("express");
 const factorial = require("./factorial");
+const { metricsMiddleware, metricsEndpoint } = require("./metricsMiddleware");
 
 const app = express();
+app.use(metricsMiddleware);
 
 app.get("/health-check", (req, res) => res.status(200).send("OK"));
 
@@ -17,5 +19,7 @@ app.get("/factorial/:n", (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+app.get("/metrics", metricsEndpoint);
 
 module.exports = app;
