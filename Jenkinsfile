@@ -27,8 +27,9 @@ pipeline {
 
     stage('Deploy via Helm') {
       steps {
-        dir(HELM_CHART_DIR) {
+        container('helm') {
           sh """
+            helm version
             helm upgrade --install ${HELM_RELEASE} . \
               --namespace ${KUBE_NAMESPACE} \
               --set image.repository=${IMAGE} \
