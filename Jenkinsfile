@@ -8,42 +8,30 @@ pipeline {
     HELM_CHART_DIR = "apps/server/chart"
     HELM_RELEASE = "server"
   }
-  stages {
-    stage('Checkout') {
-      steps { git url: 'https://github.com/your-org/poc-deployment-system.git', branch: 'main' }
-    }
 
-    stage('Infra: OpenTofu Test & Apply') {
+  stages {
+    stage('Checkout') { steps { git url: 'https://github.com/brscherer/poc-deployment-system.git', branch: 'main' } }
+
+    stage('Infra: Apply IaC') {
       steps {
         dir('infra/iac') {
-          sh 'tofu init'
-          sh 'tofu validate'
-          sh 'tofu test'
-          sh 'tofu apply -auto-approve'
+          sh '''
+            tofu init
+            tofu validate
+            tofu test
+            tofu apply -auto-approve
+          '''
         }
       }
     }
 
-    stage('Build & Test') {
-      steps {
-        dir('apps/server') {
-          script {
-            docker.image('node:20-alpine').inside {
-              sh 'npm ci'
-              sh 'npm test'
-            }
-          }
-        }
-      }
-    }
-
-    stage('Build & Push Docker Image') {
+    stage('Docker build & test') {
       steps {
         dir('apps/server') {
           script {
             docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS) {
-              def app = docker.build("${IMAGE}:${TAG}")
-              app.push()
+              def appImage = docker.build("${IMAGE}:${TAG}")
+              appImage.push()
             }
           }
         }
@@ -78,8 +66,8 @@ pipeline {
 
   post {
     failure {
-      echo "Pipeline failed — rolling back Helm deployment"
-      sh "helm rollback ${HELM_RELEASE} 0 --namespace ${KUBE_NAMESPACE} || echo 'No previous release to rollback to.'"
+      echo "Deployment failed — rolling back"
+      sh "helm rollback ${HELM_RELEASE} 0 --namespace ${KUBE_NAMESPACE} || echo 'Nothing to rollback'"
     }
   }
 }

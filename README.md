@@ -20,3 +20,9 @@ tofu validate
 tofu apply -auto-approve
 tofu test
 ```
+
+## Run App in docker
+
+```bash
+docker run --rm -p 3000:3000 brunorphl/server:latest
+```

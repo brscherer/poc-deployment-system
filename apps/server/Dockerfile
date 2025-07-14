@@ -1,12 +1,20 @@
-FROM node:20-alpine
+# Stage 1: Build dependencies
+FROM node:20.9.0-bullseye-slim AS builder
 
-WORKDIR /app
-
+WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --omit=dev
 
 COPY . .
 
-EXPOSE 3000
+# Stage 2: Runtime image
+FROM node:20.9.0-bullseye-slim
 
-CMD [ "npm", "start" ]
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app ./
+
+EXPOSE 3000
+USER node
+
+CMD ["node", "server.js"]
