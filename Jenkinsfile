@@ -16,19 +16,24 @@ pipeline {
       steps {
         dir('infra/iac') {
           sh '''
-            # Install OpenTofu (Debian/Ubuntu)
-            curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-tofu.sh
-            chmod +x install-tofu.sh
-            ./install-tofu.sh --install-method deb
+            # Install tofu as standalone binary without sudo
+            TOFU_VERSION=$(curl -s https://api.github.com/repos/opentofu/opentofu/releases/latest \
+                            | grep '"tag_name"' | head -n1 | awk -F '"' '{print $4}')
+            OS="$(uname | tr '[:upper:]' '[:lower:]')"
+            ARCH="$(uname -m | sed -e 's/aarch64/arm64/' -e 's/x86_64/amd64/')"
             
-            # Verify installation
-            tofu version
+            wget "https://github.com/opentofu/opentofu/releases/download/${TOFU_VERSION}/tofu_${TOFU_VERSION}_${OS}_${ARCH}.zip"
+            unzip tofu_${TOFU_VERSION}_${OS}_${ARCH}.zip
+            chmod +x tofu
+            mv tofu $WORKSPACE/infra/iac/tofu
+            
+            # Use local binary
+            ./tofu version
 
-            # Now run IaC commands
-            tofu init
-            tofu validate
-            tofu test
-            tofu apply -auto-approve
+            ./tofu init
+            ./tofu validate
+            ./tofu test
+            ./tofu apply -auto-approve
           '''
         }
       }
