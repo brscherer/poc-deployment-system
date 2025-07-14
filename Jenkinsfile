@@ -12,33 +12,6 @@ pipeline {
   stages {
     stage('Checkout') { steps { git url: 'https://github.com/brscherer/poc-deployment-system.git', branch: 'main' } }
 
-    stage('Infra: Apply IaC') {
-      steps {
-        dir('infra/iac') {
-          sh '''
-            # Install tofu as standalone binary without sudo
-            TOFU_VERSION=$(curl -s https://api.github.com/repos/opentofu/opentofu/releases/latest \
-                            | grep '"tag_name"' | head -n1 | awk -F '"' '{print $4}')
-            OS="$(uname | tr '[:upper:]' '[:lower:]')"
-            ARCH="$(uname -m | sed -e 's/aarch64/arm64/' -e 's/x86_64/amd64/')"
-            
-            wget "https://github.com/opentofu/opentofu/releases/download/${TOFU_VERSION}/tofu_${TOFU_VERSION}_${OS}_${ARCH}.zip"
-            unzip tofu_${TOFU_VERSION}_${OS}_${ARCH}.zip
-            chmod +x tofu
-            mv tofu $WORKSPACE/infra/iac/tofu
-            
-            # Use local binary
-            ./tofu version
-
-            ./tofu init
-            ./tofu validate
-            ./tofu test
-            ./tofu apply -auto-approve
-          '''
-        }
-      }
-    }
-
     stage('Docker build & test') {
       steps {
         dir('apps/server') {

@@ -10,14 +10,18 @@ Steps to run locally:
 ❯ minikube service prometheus-server -n infra --url # Start Prometheus
 ```
 
-## Terraform tests
-
-Steps to run:
+## Terraform
 
 ```bash
 tofu init
 tofu validate
 tofu apply -auto-approve
+tofu test
+```
+
+### Run tests
+
+```bash
 tofu test
 ```
 
