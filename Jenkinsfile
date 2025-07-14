@@ -16,6 +16,15 @@ pipeline {
       steps {
         dir('infra/iac') {
           sh '''
+            # Install OpenTofu (Debian/Ubuntu)
+            curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-tofu.sh
+            chmod +x install-tofu.sh
+            ./install-tofu.sh --install-method deb
+            
+            # Verify installation
+            tofu version
+
+            # Now run IaC commands
             tofu init
             tofu validate
             tofu test
