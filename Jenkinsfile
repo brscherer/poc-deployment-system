@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image "node:20-alpine"
-      args "-u root:root"
-    }
-  }
+  agent any
   environment {
     IMAGE = "brunorphl/server"
     TAG = "${env.BUILD_NUMBER}"
@@ -12,23 +7,19 @@ pipeline {
     KUBE_NAMESPACE = "apps"
   }
   stages {
-    stage('Checkout') {
-      steps { checkout scm }
-    }
     stage('Build & Test') {
+      agent { docker { image 'node:20-alpine' } }
       steps {
         sh 'npm ci'
         sh 'npm test'
       }
     }
-    stage('Build & Push Docker') {
+    stage('Docker Build & Push') {
       steps {
-        dir('apps/server') {
-          script {
-            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
-              def app = docker.build("${IMAGE}:${TAG}")
-              app.push()
-            }
+        script {
+          docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
+            def app = docker.build("${IMAGE}:${TAG}")
+            app.push()
           }
         }
       }
