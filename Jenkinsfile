@@ -15,6 +15,8 @@ pipeline {
         }
       }
       steps {
+        // Debugging step to list workspace contents
+        sh 'echo "Workspace content:" && ls -la "$WORKSPACE"'
         sh 'npm ci'
         sh 'npm test'
       }
