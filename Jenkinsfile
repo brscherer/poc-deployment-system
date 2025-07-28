@@ -7,11 +7,15 @@ pipeline {
     KUBE_NAMESPACE = "apps"
   }
   stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
     stage('Build & Test') {
       agent { 
         docker { 
           image 'node:20-alpine'
           reuseNode true
+          args "-v ${env.WORKSPACE}:${env.WORKSPACE}"
         }
       }
       steps {
