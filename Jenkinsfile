@@ -1,61 +1,61 @@
 pipeline {
-  agent { label 'jenkins-agent' }
+  agent any
   environment {
     IMAGE = "brunorphl/server"
-    TAG   = "${env.BUILD_NUMBER}"
-    DOCKER_CREDENTIALS = 'dockerhub-creds'
-    KUBE_NAMESPACE = "apps"
-    HELM_CHART_DIR = "apps/server/chart"
+    TAG = "${env.BUILD_NUMBER}"
     HELM_RELEASE = "server"
+    KUBE_NAMESPACE = "apps"
   }
-
   stages {
-    stage('Checkout') { steps { git url: 'https://github.com/brscherer/poc-deployment-system.git', branch: 'main' } }
-
-    stage('Docker build & test') {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+    stage('Build & Test') {
+      steps {
+        dir('apps/server') {
+          docker.image('node:20-alpine').inside {
+            sh 'npm ci'
+            sh 'npm test'
+          }
+        }
+      }
+    }
+    stage('Build & Push Docker') {
       steps {
         dir('apps/server') {
           script {
-            docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS) {
-              def appImage = docker.build("${IMAGE}:${TAG}")
-              appImage.push()
+            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
+              def app = docker.build("${IMAGE}:${TAG}")
+              app.push()
             }
           }
         }
       }
     }
-
     stage('Deploy via Helm') {
       steps {
-        container('helm') {
-          sh """
-            helm version
-            helm upgrade --install ${HELM_RELEASE} . \
-              --namespace ${KUBE_NAMESPACE} \
-              --set image.repository=${IMAGE} \
-              --set image.tag=${TAG} \
-              --wait --timeout 5m
-          """
-        }
+        sh """
+          helm upgrade --install ${HELM_RELEASE} ${WORKSPACE}/apps/server/chart \
+            --namespace ${KUBE_NAMESPACE} \
+            --set image.repository=${IMAGE} \
+            --set image.tag=${TAG} \
+            --wait --timeout 5m
+        """
       }
     }
-
     stage('Verify Deployment') {
       steps {
         sh """
           kubectl rollout status deployment/${HELM_RELEASE} -n ${KUBE_NAMESPACE} --timeout=2m
-          kubectl wait --for=condition=ready pod \
-            -l app.kubernetes.io/instance=${HELM_RELEASE} \
-            -n ${KUBE_NAMESPACE} --timeout=2m
+          kubectl wait --for=condition=available deployment/${HELM_RELEASE} -n ${KUBE_NAMESPACE} --timeout=2m
         """
       }
     }
   }
-
   post {
     failure {
-      echo "Deployment failed — rolling back"
-      sh "helm rollback ${HELM_RELEASE} 0 --namespace ${KUBE_NAMESPACE} || echo 'Nothing to rollback'"
+      echo 'Failure detected. Rolling back...'
+      sh "helm rollback ${HELM_RELEASE} 0 --namespace ${KUBE_NAMESPACE} || echo 'No previous release'"
     }
   }
 }
