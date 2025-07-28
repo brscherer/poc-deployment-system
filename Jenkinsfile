@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image "node:20-alpine"
+      args "-u root:root"
+    }
+  }
   environment {
     IMAGE = "brunorphl/server"
     TAG = "${env.BUILD_NUMBER}"
@@ -12,12 +17,8 @@ pipeline {
     }
     stage('Build & Test') {
       steps {
-        dir('apps/server') {
-          docker.image('node:20-alpine').inside {
-            sh 'npm ci'
-            sh 'npm test'
-          }
-        }
+        sh 'npm ci'
+        sh 'npm test'
       }
     }
     stage('Build & Push Docker') {
