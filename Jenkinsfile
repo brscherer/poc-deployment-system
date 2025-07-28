@@ -8,7 +8,12 @@ pipeline {
   }
   stages {
     stage('Build & Test') {
-      agent { docker { image 'node:20-alpine' } }
+      agent { 
+        docker { 
+          image 'node:20-alpine'
+          reuseNode true
+        }
+      }
       steps {
         sh 'npm ci'
         sh 'npm test'
