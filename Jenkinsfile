@@ -15,7 +15,6 @@ pipeline {
         docker { 
           image 'node:20-alpine'
           reuseNode true
-          args "-v ${env.WORKSPACE}:${env.WORKSPACE}"
         }
       }
       steps {
