@@ -11,15 +11,7 @@ pipeline {
       steps { checkout scm }
     }
     stage('Build & Test') {
-      agent { 
-        docker { 
-          image 'node:20-alpine'
-          reuseNode true
-        }
-      }
       steps {
-        // Debugging step to list workspace contents
-        sh 'echo "Workspace content:" && ls -la "$WORKSPACE"'
         sh 'npm ci'
         sh 'npm test'
       }
