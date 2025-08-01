@@ -15,9 +15,10 @@ pipeline {
     }
     stage('Build & Test') {
       steps {
-        sh 'cd apps/server'
-        sh 'npm ci'
-        sh 'npm test'
+        dir('apps/server') {
+          sh 'npm ci'
+          sh 'npm test'
+        }
       }
     }
     stage('Docker Build & Push') {
