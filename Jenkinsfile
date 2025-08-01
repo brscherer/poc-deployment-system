@@ -21,16 +21,6 @@ pipeline {
         }
       }
     }
-    stage('Docker Build & Push') {
-      steps {
-        script {
-          docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
-            def app = docker.build("${IMAGE}:${TAG}")
-            app.push()
-          }
-        }
-      }
-    }
     stage('Deploy via Helm') {
       steps {
         sh """
