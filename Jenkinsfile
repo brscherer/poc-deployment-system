@@ -6,6 +6,9 @@ pipeline {
     HELM_RELEASE = "server"
     KUBE_NAMESPACE = "apps"
   }
+  tools {
+    nodejs 'nodejs'
+  }
   stages {
     stage('Checkout') {
       steps { checkout scm }
