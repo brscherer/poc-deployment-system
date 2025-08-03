@@ -16,17 +16,9 @@ kubectl create namespace apps || true
 
 # 4. Add Helm repos
 echo "Adding Helm repositories..."
-helm repo add jenkins https://charts.jenkins.io
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
-
-# 5. Install Jenkins in infra
-echo "Installing Jenkins..."
-helm upgrade --install jenkins jenkins/jenkins \
-  --namespace infra \
-  --set controller.serviceType=NodePort \
-  --set controller.nodePort=32000
 
 # 6. Install Prometheus in infra
 echo "Installing Prometheus..."
@@ -46,12 +38,7 @@ echo "Waiting for infra services to be ready..."
 kubectl rollout status deployment/prometheus-server -n infra
 kubectl rollout status deployment/grafana -n infra
 
-# Wait for Jenkins controller StatefulSet
-echo "Waiting for Jenkins StatefulSet..."
-kubectl rollout status statefulset/jenkins -n infra --timeout=5m
-
 # 9. Output URLs
-echo "Jenkins URL:    $(minikube service jenkins -n infra --url)"
 echo "Grafana URL:    $(minikube service grafana -n infra --url)"
 echo "Prometheus UI:  $(minikube service prometheus-server -n infra --url)"
 

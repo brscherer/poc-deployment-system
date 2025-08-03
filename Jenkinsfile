@@ -35,6 +35,8 @@ pipeline {
     stage('Infra: Apply IaC (OpenTofu)') {
       steps {
         dir('infra/iac') {
+          sh 'tofu init'
+          sh 'tofu validate'
           sh 'tofu test'
           sh 'tofu apply --auto-approve'
         }
