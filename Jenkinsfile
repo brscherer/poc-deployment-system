@@ -48,7 +48,7 @@ pipeline {
       steps {
         sh """
           echo "Helm connecting via config:"
-          kubectl version --short
+          kubectl version
           helm version --short
           helm upgrade --install ${HELM_RELEASE} ${WORKSPACE}/apps/server/chart \
             --namespace ${KUBE_NAMESPACE} \
