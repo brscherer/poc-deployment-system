@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { .Release.Name } }
+  name: { { .Chart.Name } }
 spec:
   replicas: { { .Values.replicaCount } }
   selector:
     matchLabels:
-      app: { { .Release.Name } }
+      app: { { .Chart.Name } }
   template:
     metadata:
       labels:
-        app: { { .Release.Name } }
+        app: { { .Chart.Name } }
     spec:
       containers:
         - name: server
