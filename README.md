@@ -74,8 +74,6 @@ docker run --rm -p 3000:3000 brunorphl/server:latest
 ## 5. Accessing Services (Minikube)
 
 ```bash
-# Jenkins (if deployed in cluster)
-minikube service jenkins -n infra --url
 # Grafana
 minikube service grafana -n infra --url
 # Prometheus

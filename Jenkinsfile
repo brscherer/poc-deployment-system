@@ -5,6 +5,7 @@ pipeline {
     TAG = "${env.BUILD_NUMBER}"
     HELM_RELEASE = "server"
     KUBE_NAMESPACE = "apps"
+    KUBECONFIG = "/var/lib/jenkins/.kube/config"
   }
   tools {
     nodejs 'nodejs'
@@ -21,9 +22,32 @@ pipeline {
         }
       }
     }
+    stage('Build & Push Docker') {
+      steps {
+        script {
+          docker.withRegistry('https://registry.hub.docker.com','dockerhub-creds') {
+            docker.build("${IMAGE}:${TAG}", 'apps/server').push()
+          }
+        }
+      }
+    }
+
+    stage('Infra: Apply IaC (OpenTofu)') {
+      steps {
+        dir('infra/iac') {
+          sh 'tofu test'
+          sh 'tofu apply --auto-approve'
+        }
+      }
+    }
+
+
     stage('Deploy via Helm') {
       steps {
         sh """
+          echo "Helm connecting via config:"
+          kubectl version --short
+          helm version --short
           helm upgrade --install ${HELM_RELEASE} ${WORKSPACE}/apps/server/chart \
             --namespace ${KUBE_NAMESPACE} \
             --set image.repository=${IMAGE} \
