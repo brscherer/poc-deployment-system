@@ -1,11 +1,10 @@
 pipeline {
   agent any
   environment {
-    IMAGE = "brunorphl/server"
+    IMAGE = "ghcr.io/brscherer/server"
     TAG = "${env.BUILD_NUMBER}"
     HELM_RELEASE = "server"
     KUBE_NAMESPACE = "apps"
-    KUBECONFIG = "/var/lib/jenkins/.kube/config"
   }
   tools {
     nodejs 'nodejs'
@@ -22,27 +21,30 @@ pipeline {
         }
       }
     }
-    stage('Build & Push Docker') {
+    
+    stage('Login to GHCR') {
       steps {
-        script {
-          docker.withRegistry('https://registry.hub.docker.com','dockerhub-creds') {
-            docker.build("${IMAGE}:${TAG}", 'apps/server').push()
-          }
+        withCredentials([usernamePassword(credentialsId: 'ghcr-creds', usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_TOKEN')]) {
+          sh 'echo $GHCR_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin'
         }
       }
     }
 
-    stage('Infra: Apply IaC (OpenTofu)') {
+    stage('Docker build') {
       steps {
-        dir('infra/iac') {
-          sh 'tofu init'
-          sh 'tofu validate'
-          sh 'tofu test'
-          sh 'tofu apply --auto-approve'
+        dir("apps/server"){
+          sh "docker build -t $IMAGE:$BUILD_NUMBER ."
         }
       }
     }
 
+    stage('Docker push') {
+      steps {
+        dir("apps/server"){
+          sh "docker push $IMAGE:$BUILD_NUMBER "
+        }
+      }
+    }
 
     stage('Deploy via Helm') {
       steps {
