@@ -1,3 +1,7 @@
+resource "kind_cluster" "default" {
+  name = "${var.prefix}poc-kind-cluster"
+}
+
 resource "kubernetes_namespace" "infra" {
   metadata { name = "infra" }
 }
@@ -23,4 +27,17 @@ resource "helm_release" "grafana" {
   values = [
     file("${path.module}/grafana-values.yaml")
   ]
+}
+
+resource "helm_release" "jenkins" {
+  name       = "jenkins"
+  namespace  = kubernetes_namespace.infra.metadata[0].name
+  repository = "https://charts.jenkins.io"
+  chart      = "jenkins"
+  version    = "5.8.73"
+  create_namespace = false
+  values = [
+    file("${path.module}/jenkins-values.yaml")
+  ]
+  depends_on = [kind_cluster.default]
 }

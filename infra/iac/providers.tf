@@ -1,20 +1,11 @@
-terraform {
-  required_providers {
-    minikube = {
-      source = "scott-the-programmer/minikube"
-      version = "0.5.0"
-    }
-  }
-}
-
-provider "minikube" {}
+provider "kind" {}
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = kind_cluster.default.kubeconfig_path
 }
 
 provider "helm" {
   kubernetes = {
-    config_path = "~/.kube/config"
+    config_path = kind_cluster.default.kubeconfig_path
   }
 }
