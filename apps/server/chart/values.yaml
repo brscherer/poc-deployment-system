@@ -1,5 +1,5 @@
 image:
-  repository: brscherer/server
+  repository: ghcr.io/brscherer/server
   tag: "latest"
 replicaCount: 1
 service:
