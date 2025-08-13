@@ -36,12 +36,60 @@ controller:
           system:
             domainCredentials:
               - credentials:
-                - usernamePassword:
-                    scope: GLOBAL
-                    id: "ghcr-creds"
-                    username: "${jenkins-ghcr-secret-username}"
-                    password: "${jenkins-ghcr-secret-token}"
-                    description: "GitHub Container Registry credentials"
+                  - usernamePassword:
+                      scope: GLOBAL
+                      id: "ghcr-creds"
+                      username: "${jenkins-ghcr-secret-username}"
+                      password: "${jenkins-ghcr-secret-token}"
+                      description: "GitHub Container Registry credentials"
+
+        tool:
+          nodejs:
+            installations:
+              - name: "nodejs"
+                home: ""
+                properties:
+                  - installSource:
+                      installers:
+                        - nodeJSInstaller:
+                            id: "22.11.0"   # Node.js version to install
+                            npmPackagesRefreshHours: 72
+                            installNpm: true
+
+        jobs:
+          - script: >
+              multibranchPipelineJob('poc-deployment-system') {
+                branchSources {
+                  branchSource {
+                    source {
+                      git {
+                        id('poc-deployment-system-git')
+                        remote('https://github.com/brscherer/poc-deployment-system.git')
+                        credentialsId('ghcr-creds')
+                      }
+                    }
+                    strategy {
+                      defaultBranchPropertyStrategy {
+                        props {
+                          noTriggerBranchProperty()
+                        }
+                      }
+                    }
+                  }
+                }
+                factory {
+                  workflowBranchProjectFactory {
+                    scriptPath('Jenkinsfile')
+                  }
+                }
+                orphanedItemStrategy {
+                  discardOldItems {
+                    daysToKeep(30)
+                    numToKeep(10)
+                  }
+                }
+              }
+
 agent:
   podName: jenkins-agent
   namespace: infra
