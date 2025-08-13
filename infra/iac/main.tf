@@ -25,7 +25,7 @@ resource "helm_release" "grafana" {
   chart      = "grafana"
   version    = "9.0.0"
   values = [
-    file("${path.module}/grafana-values.yaml")
+    file("${path.module}/values/grafana-values.yaml")
   ]
 }
 
@@ -37,7 +37,7 @@ resource "helm_release" "jenkins" {
   version    = "5.8.73"
   create_namespace = false
   values = [
-    file("${path.module}/jenkins-values.yaml")
+    file("${path.module}/values/jenkins-values.yaml")
   ]
   depends_on = [kind_cluster.default]
 }
