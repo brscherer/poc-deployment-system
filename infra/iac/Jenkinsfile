@@ -1,0 +1,65 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('OpenTofu Init') {
+      steps {
+        dir('infra/iac') {
+          sh 'tofu init -upgrade'
+        }
+      }
+    }
+
+    stage('OpenTofu Test') {
+      steps {
+        dir('infra/iac') {
+          sh 'tofu test -verbose'
+        }
+      }
+    }
+
+    stage('OpenTofu Plan') {
+      steps {
+        dir('infra/iac') {
+          withCredentials([
+            string(credentialsId: 'ghcr-token', variable: 'TF_VAR_ghcr_token'),
+            string(credentialsId: 'jenkins-admin-password', variable: 'TF_VAR_jenkins_admin_password')
+          ]) {
+            sh 'tofu plan -compact-warnings -out=tfplan'
+          }
+        }
+      }
+    }
+
+    stage('OpenTofu Apply') {
+      steps {
+        dir('infra/iac') {
+          withCredentials([
+            string(credentialsId: 'ghcr-token', variable: 'TF_VAR_ghcr_token'),
+            string(credentialsId: 'jenkins-admin-password', variable: 'TF_VAR_jenkins_admin_password')
+          ]) {
+            sh 'tofu apply -auto-approve tfplan'
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      dir('infra/iac') {
+        sh 'rm -f tfplan'
+      }
+    }
+  }
+}
