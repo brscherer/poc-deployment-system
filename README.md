@@ -1,91 +1,67 @@
-# POC - Deployment System
+# POC Deployment System
 
-This project demonstrates a complete deployment system with an API server, CI/CD pipeline, infrastructure as code, and monitoring stack.
+This project demonstrates a deployment system using Kubernetes, Helm, Jenkins, Prometheus, and Grafana, managed with [OpenTofu](https://opentofu.org/) (Terraform alternative).
 
-## Jenkins configuration and jobs are persistent in `/home/$USER/jenkins_home`.
+## Namespaces Created with Tofu
 
-## Prerequisites
+OpenTofu provisions the following Kubernetes namespaces:
 
-- WSL2 (Ubuntu recommended)
-- Docker (with Linux containers)
-- Minikube (for local Kubernetes cluster)
-- Terraform (or OpenTofu)
-- Java 11+ (for Jenkins)
+- **infra**: Infrastructure components (Jenkins, Prometheus, Grafana, secrets)
+- **apps**: Application workloads
 
----
+## Credentials Needed
 
-## 1. Start Docker and Minikube
+The following credentials are required and managed via Kubernetes secrets:
 
-Start Docker Desktop and then run the following command to start minikube
+- **GitHub Container Registry (GHCR)**
+  - `ghcr_username`: GitHub username (default: `brscherer`)
+  - `ghcr_token`: GitHub token (sensitive)
+- **Jenkins Admin**
+  - `jenkins_admin_password`: Jenkins admin password (default: `admin`, sensitive)
 
-```bash
-minikube start --driver=docker
-```
+These are set in `infra/iac/variables.tf` and referenced in `infra/iac/secrets.tf`.
 
----
+## How to Run
 
-## 2. Run Jenkins Standalone (WSL2)
+1. **Install Dependencies**
+   - [OpenTofu](https://opentofu.org/) (or Terraform)
+   - [kubectl](https://kubernetes.io/docs/tasks/tools/)
+   - [Helm](https://helm.sh/)
+   - [Docker](https://docs.docker.com/get-docker/)
 
-1. Install Java if not present:
+2. **Provision the Cluster**
    ```bash
-   sudo apt update
-   sudo apt install openjdk-17-jdk -y
+   cd infra/iac
+   tofu init
+   tofu apply
    ```
-2. Create a persistent Jenkins home directory:
-   ```bash
-   mkdir -p /home/$USER/jenkins_home
-   ```
-3. Download Jenkins:
-   ```bash
-   wget -O /home/$USER/jenkins.war https://get.jenkins.io/war-stable/latest/jenkins.war
-   ```
-4. Start Jenkins:
-   ```bash
-   export JENKINS_HOME=/home/$USER/jenkins_home
-   java -jar /home/$USER/jenkins.war
-   ```
-5. Access Jenkins at: http://localhost:8080
+   This will create a Kind cluster, namespaces, secrets, and deploy Jenkins, Prometheus, and Grafana.
 
----
+3. **Access Services**
+   - **Grafana**:
+     ```bash
+     kubectl port-forward -n infra svc/grafana 3000:80
+     ```
+     Access at [http://localhost:3000](http://localhost:3000)
+   - **Jenkins**:
+     ```bash
+     kubectl port-forward -n infra svc/jenkins 8080:8080
+     ```
+     Access at [http://localhost:8080](http://localhost:8080)
 
-## 3. Infrastructure as Code (Terraform/OpenTofu)
+## Outputs
 
-```bash
-# Initialize
-tofu init
-# Validate
-tofu validate
-# Apply infrastructure
-tofu apply -auto-approve
-# Run tests
-tofu test
-```
+After running `tofu apply`, outputs will include:
+- Cluster name
+- Kubeconfig path
+- Port-forward commands for Grafana and Jenkins
 
----
+## Project Structure
 
-## 4. Running the API Server (Docker)
+- `apps/server`: Node.js application and Helm chart
+- `infra/iac`: OpenTofu (Terraform) code for infrastructure
 
-```bash
-docker run --rm -p 3000:3000 brunorphl/server:latest
-```
-
----
-
-## 5. Accessing Services (Minikube)
-
-```bash
-# Grafana
-minikube service grafana -n infra --url
-# Prometheus
-minikube service prometheus-server -n infra --url
-```
-
----
-
-## 6. CI/CD Pipeline
-
-- The pipeline is defined in `Jenkinsfile` and will:
-  - Build & test the Node.js app
-  - Build and push Docker images
-  - Deploy to Kubernetes via Helm
-  - Verify deployment
+## Notes
+- Secrets are stored as Kubernetes secrets in the `infra` namespace.
+- You can customize values in `infra/iac/values/grafana-values.yaml` and `jenkins-values.yaml`.
+- For more details, see the respective files in `infra/iac`.
