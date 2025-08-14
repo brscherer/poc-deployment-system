@@ -49,3 +49,6 @@ infra/iac/.terraform/
 # OS files
 *.swp
 *.lock
+
+test-poc-kind-cluster-config
+poc-kind-cluster-config

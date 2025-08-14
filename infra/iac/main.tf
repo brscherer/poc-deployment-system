@@ -2,29 +2,12 @@ resource "kind_cluster" "default" {
   name = "${var.prefix}poc-kind-cluster"
 }
 
-# Wait for all nodes to be ready before proceeding
-resource "null_resource" "wait_for_cluster" {
-  depends_on = [kind_cluster.default]
-
-  provisioner "local-exec" {
-        command = <<EOT
-    if ! kubectl config current-context >/dev/null 2>&1; then
-      echo "kubectl is not configured or context is not set"
-      exit 1
-    fi
-    kubectl wait --for=condition=Ready nodes --all --timeout=120s
-    EOT
-  }
-}
-
 resource "kubernetes_namespace" "infra" {
   metadata { name = "infra" }
-  depends_on = [null_resource.wait_for_cluster]
 }
 
 resource "kubernetes_namespace" "apps" {
   metadata { name = "apps" }
-  depends_on = [null_resource.wait_for_cluster]
 }
 
 resource "helm_release" "prometheus" {
@@ -34,8 +17,8 @@ resource "helm_release" "prometheus" {
   chart      = "prometheus"
   version    = "27.14.0"
   create_namespace = false
-
-  depends_on = [null_resource.wait_for_cluster]
+  wait    = true
+  timeout = 900
 }
 
 resource "helm_release" "grafana" {
@@ -52,8 +35,8 @@ resource "helm_release" "grafana" {
     name  = "service.type"
     value = "ClusterIP"
   }
-
-  depends_on = [null_resource.wait_for_cluster]
+  wait    = true
+  timeout = 900
 }
 
 resource "helm_release" "jenkins" {
@@ -67,5 +50,7 @@ resource "helm_release" "jenkins" {
     file("${path.module}/values/jenkins-values.yaml")
   ]
 
-  depends_on = [null_resource.wait_for_cluster]
+  depends_on = [kind_cluster.default]
+  wait    = true
+  timeout = 900
 }

@@ -10,6 +10,7 @@ controller:
     - credentials-binding
     - nodejs
     - github
+    - job-dsl
   admin:
     username: admin
     password: admin
@@ -52,43 +53,9 @@ controller:
                   - installSource:
                       installers:
                         - nodeJSInstaller:
-                            id: "22.11.0"   # Node.js version to install
+                            id: "22.11.0"
                             npmPackagesRefreshHours: 72
-                            installNpm: true
-
-        jobs:
-          - script: >
-              multibranchPipelineJob('poc-deployment-system') {
-                branchSources {
-                  branchSource {
-                    source {
-                      git {
-                        id('poc-deployment-system-git')
-                        remote('https://github.com/brscherer/poc-deployment-system.git')
-                        credentialsId('ghcr-creds')
-                      }
-                    }
-                    strategy {
-                      defaultBranchPropertyStrategy {
-                        props {
-                          noTriggerBranchProperty()
-                        }
-                      }
-                    }
-                  }
-                }
-                factory {
-                  workflowBranchProjectFactory {
-                    scriptPath('Jenkinsfile')
-                  }
-                }
-                orphanedItemStrategy {
-                  discardOldItems {
-                    daysToKeep(30)
-                    numToKeep(10)
-                  }
-                }
-              }
+                            npmPackages: "npm@latest yarn@latest"
 
 agent:
   podName: jenkins-agent
@@ -110,6 +77,7 @@ agent:
     limits:
       cpu: 1
       memory: 2Gi
+
 persistence:
   enabled: true
   size: 8Gi
