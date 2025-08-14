@@ -56,6 +56,40 @@ controller:
                             id: "22.11.0"
                             npmPackagesRefreshHours: 72
                             npmPackages: "npm@latest yarn@latest"
+      main-config: |
+        jobs:
+          - script: >
+              multibranchPipelineJob('poc-deployment-system') {
+                branchSources {
+                  branchSource {
+                    source {
+                      git {
+                        id('poc-deployment-system-git')
+                        remote('https://github.com/brscherer/poc-deployment-system.git')
+                        credentialsId('ghcr-creds')
+                      }
+                    }
+                    strategy {
+                      defaultBranchPropertyStrategy {
+                        props {
+                          noTriggerBranchProperty()
+                        }
+                      }
+                    }
+                  }
+                }
+                factory {
+                  workflowBranchProjectFactory {
+                    scriptPath('Jenkinsfile')
+                  }
+                }
+                orphanedItemStrategy {
+                  discardOldItems {
+                    daysToKeep(30)
+                    numToKeep(10)
+                  }
+                }
+              }
 
 agent:
   podName: jenkins-agent
