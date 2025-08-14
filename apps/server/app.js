@@ -5,7 +5,7 @@ const { metricsMiddleware, metricsEndpoint } = require("./metricsMiddleware");
 const app = express();
 app.use(metricsMiddleware);
 
-app.get("/health-check", (req, res) => res.status(200).send("OK"));
+app.get("/health", (req, res) => res.status(200).send("OK"));
 
 app.get("/factorial/:n", (req, res) => {
   const n = parseInt(req.params.n, 10);

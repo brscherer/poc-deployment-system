@@ -11,10 +11,10 @@ output "kubeconfig_path" {
 
 output "grafana_port_forward" {
   description = "Command to port-forward Grafana"
-  value       = "kubectl port-forward -n infra svc/grafana 3000:80"
+  value       = "kubectl port-forward -n infra svc/grafana 3000:3000"
 }
 
 output "jenkins_port_forward" {
   description = "Command to port-forward Jenkins"
-  value       = "kubectl port-forward -n infra svc/jenkins 8080:8080"
+  value       = "kubectl port-forward -n infra svc/jenkins 8081:8081"
 }

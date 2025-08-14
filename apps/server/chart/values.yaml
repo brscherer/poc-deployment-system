@@ -3,14 +3,16 @@ image:
   tag: "latest"
 replicaCount: 1
 service:
+  type: ClusterIP
   port: 3000
+  metricsPort: 9100
 livenessProbe:
-  path: /health-check
+  path: /health
   port: 3000
   initialDelaySeconds: 15
   periodSeconds: 10
 readinessProbe:
-  path: /health-check
+  path: /health
   port: 3000
   initialDelaySeconds: 5
   periodSeconds: 5

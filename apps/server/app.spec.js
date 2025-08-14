@@ -21,9 +21,9 @@ describe("API /factorial", () => {
   });
 });
 
-describe("API /health-check", () => {
-  test("GET /health-check returns OK", async () => {
-    const res = await request(app).get("/health-check");
+describe("API /health", () => {
+  test("GET /health returns OK", async () => {
+    const res = await request(app).get("/health");
     expect(res.statusCode).toBe(200);
     expect(res.text).toBe("OK");
   });
