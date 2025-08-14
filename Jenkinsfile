@@ -46,25 +46,23 @@ pipeline {
       }
     }
 
-    stage('Deploy via Helm') {
+    stage('Build Helm Chart') {
+      steps {
+        dir("apps/server/chart") {
+          sh 'helm lint .'
+          sh 'helm package .'
+        }
+      }
+    }
+
+    stage('Deploy Helm Chart') {
       steps {
         sh """
-          echo "Helm connecting via config:"
-          kubectl version
-          helm version --short
           helm upgrade --install ${HELM_RELEASE} ${WORKSPACE}/apps/server/chart \
             --namespace ${KUBE_NAMESPACE} \
             --set image.repository=${IMAGE} \
             --set image.tag=${TAG} \
             --wait --timeout 5m
-        """
-      }
-    }
-    stage('Verify Deployment') {
-      steps {
-        sh """
-          kubectl rollout status deployment/${HELM_RELEASE} -n ${KUBE_NAMESPACE} --timeout=2m
-          kubectl wait --for=condition=available deployment/${HELM_RELEASE} -n ${KUBE_NAMESPACE} --timeout=2m
         """
       }
     }
