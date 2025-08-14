@@ -45,9 +45,16 @@ These are set in `infra/iac/variables.tf` and referenced in `infra/iac/secrets.t
      Access at [http://localhost:3000](http://localhost:3000)
    - **Jenkins**:
      ```bash
-     kubectl port-forward -n infra svc/jenkins 8080:8080
+     kubectl port-forward -n infra svc/jenkins 8081:8081
      ```
-     Access at [http://localhost:8080](http://localhost:8080)
+     Access at [http://localhost:8081](http://localhost:8081)
+   - **Factorial Server**:
+     ```bash
+     kubectl port-forward -n infra svc/server 3001:3000
+     ```
+     Access at [http://localhost:3001](http://localhost:3001)
+
+
 
 ## Outputs
 
