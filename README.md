@@ -53,7 +53,7 @@ These are set in `infra/iac/variables.tf` and referenced in `infra/iac/secrets.t
      Access at [http://localhost:8081](http://localhost:8081)
    - **Factorial Server**:
      ```bash
-     kubectl port-forward -n infra svc/server 3001:3000
+     kubectl port-forward -n apps svc/server 3001:3000
      ```
      Access at [http://localhost:3001](http://localhost:3001)
 
