@@ -2,6 +2,9 @@
 
 This project demonstrates a deployment system using Kubernetes, Helm, Jenkins, Prometheus, and Grafana, managed with [OpenTofu](https://opentofu.org/) (Terraform alternative).
 
+<img width="863" height="730" alt="image" src="https://github.com/user-attachments/assets/89f3809a-76d7-43d0-9973-23d60e3318e8" />
+
+
 ## Namespaces Created with Tofu
 
 OpenTofu provisions the following Kubernetes namespaces:
