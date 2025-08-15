@@ -6,7 +6,7 @@ metadata:
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/path: "/metrics"
-    prometheus.io/port: "{{ .Values.service.metricsPort }}"
+    prometheus.io/port: "{{ .Values.service.port }}"
 spec:
   type: ClusterIP
   selector:
@@ -15,6 +15,3 @@ spec:
     - name: http
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}
-    - name: metrics
-      port: {{ .Values.service.metricsPort }}
-      targetPort: {{ .Values.service.metricsPort }}
