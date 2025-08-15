@@ -20,6 +20,14 @@ pipeline {
       }
     }
 
+    stage('Clean Kind Cluster') {
+      steps {
+        dir('infra/iac') {
+          sh 'kind delete cluster --name test-poc-kind-cluster || true'
+        }
+      }
+    }
+
     stage('OpenTofu Test') {
       steps {
         dir('infra/iac') {
