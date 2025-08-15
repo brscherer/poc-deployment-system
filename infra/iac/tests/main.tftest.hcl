@@ -43,3 +43,7 @@ run "grafana_helm" {
     error_message = "Grafana Helm release is not in the 'infra' namespace"
   }
 }
+
+teardown "delete_kind_cluster" {
+  command = "kind delete cluster --name test-poc-kind-cluster"
+}
