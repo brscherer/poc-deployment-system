@@ -75,3 +75,8 @@ After running `tofu apply`, outputs will include:
 - Secrets are stored as Kubernetes secrets in the `infra` namespace.
 - You can customize values in `infra/iac/values/grafana-values.yaml` and `jenkins-values.yaml`.
 - For more details, see the respective files in `infra/iac`.
+- If you didn't set a `KUBECONFIG` environment variable in tyour local jenkins pointing to a shared location, the clusters will be created inside jenkins (usually `/var/lib/jenkins/.kube/config`). Run the following commands to fix it:
+```bash
+sudo cp /var/lib/jenkins/.kube/config ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
+``` 
