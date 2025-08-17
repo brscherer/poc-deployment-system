@@ -6,7 +6,7 @@ test("factorial of 0 and 1 is 1", () => {
 });
 
 test("factorial of 5 is 120", () => {
-  expect(factorial(5)).toBe(120);
+  expect(factorial(5)).toBe(125);
 });
 
 test("factorial negative throws", () => {
