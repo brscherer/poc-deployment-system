@@ -15,11 +15,5 @@ RUN ln -s /usr/bin/podman /usr/bin/docker
 # Install Helm
 RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-# Install Gradle
-RUN apt-get install -y wget unzip && \
-    wget https://services.gradle.org/distributions/gradle-8.7-bin.zip -O /tmp/gradle.zip && \
-    unzip /tmp/gradle.zip -d /opt && \
-    ln -s /opt/gradle-8.7/bin/gradle /usr/bin/gradle
-
 # Install Git
 RUN apt-get install -y git

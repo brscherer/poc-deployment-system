@@ -92,7 +92,7 @@ agent:
   runAsUser: 0
   image:
     registry: ghcr.io
-    repository: alex-carvalho/sandbox/jenkins-agent
+    repository: brscherer/jenkins-agent
     tag: latest
     pullPolicy: Always
   customJenkinsLabels: "infra jenkins"
